@@ -28,6 +28,10 @@ export abstract class ShaderProgram {
         gl.useProgram(null)
     }
 
+    getAttributeLocation(name: string) : number {
+        return gl.getAttribLocation(this.program, name)
+    }
+
     private createShader(type: number, source: string) {
         var shader = gl.createShader(type)
         gl.shaderSource(shader, source)
@@ -40,6 +44,14 @@ export abstract class ShaderProgram {
 }
 
 export class SimpleShader extends ShaderProgram {
+
+    readonly positionAttr: number
+
+    constructor(vertexSrc: string, fragmentSrc: string) {
+        super(vertexSrc, fragmentSrc)
+        this.positionAttr = this.getAttributeLocation("position")
+        console.log(`Position attribute location: ${this.positionAttr}`)
+    }
 
     loadProjectionMatrix(matrix: Float32Array) {
         var location = gl.getUniformLocation(this.program, "projectionMatrix")

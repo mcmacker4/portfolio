@@ -1,3 +1,3 @@
 
-
-export const gl = (<HTMLCanvasElement>document.getElementById('glCanvas')).getContext('webgl')
+export const canvas = <HTMLCanvasElement>document.getElementById('glCanvas')
+export const gl = canvas.getContext('webgl')

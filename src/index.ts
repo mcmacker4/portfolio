@@ -1,16 +1,13 @@
 import { SimpleModel } from './model/model'
 import { SimpleShader } from './graphics/shader'
+import { Renderer } from './graphics/renderer'
 
-export const gl: WebGLRenderingContext = (<HTMLCanvasElement>document.getElementById('glCanvas')).getContext('webgl')
+import { canvas, gl } from './gl'
 
 const vertices = [
-    -0.5, 0.5, 0.0,
     -0.5, -0.5, 0.0,
     0.5, -0.5, 0.0,
-    
-    -0.5, 0.5, 0.0,
-    0.5, -0.5, 0.0,
-    0.5, 0.5, 0.0,
+    0.0, 0.5, 0.0,
 ]
 
 const vertexShader = `\
@@ -38,15 +35,24 @@ class Portfolio {
 
     simpleModel: SimpleModel
     simpleShader: SimpleShader
+    renderer: Renderer
 
     constructor() {
+        //Resize
+        this.onResize();
+        window.onresize = () => this.onResize();
+
         //Model
         var verticesBuffer = new Float32Array(vertices.length)
         verticesBuffer.set(vertices)
         this.simpleModel = new SimpleModel(verticesBuffer)
 
         //Shader
-        this.simpleShader = new SimpleShader(vertexShader, fragmentShader);
+        this.simpleShader = new SimpleShader(vertexShader, fragmentShader)
+
+        //Renderer
+        this.renderer = new Renderer()
+        this.renderer.setShader(this.simpleShader)        
     }
 
     start() {
@@ -57,10 +63,16 @@ class Portfolio {
     private loop() {
         gl.clear(gl.COLOR_BUFFER_BIT)
 
-        this.simpleShader.start()
-        this.simpleModel.draw()
+        this.renderer.draw(this.simpleModel)
 
-        //requestAnimationFrame(() => this.loop())
+        requestAnimationFrame(() => this.loop())
+    }
+
+    private onResize() {
+        canvas.width = window.innerWidth
+        canvas.height = window.innerHeight
+        gl.viewport(0, 0, canvas.width, canvas.height)
+        console.log(`Window size: ${canvas.width}, ${canvas.height}`)
     }
 
 }
