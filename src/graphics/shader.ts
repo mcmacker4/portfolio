@@ -32,6 +32,10 @@ export abstract class ShaderProgram {
         return gl.getAttribLocation(this.program, name)
     }
 
+    getUniformLocation(name: string) : WebGLUniformLocation {
+        return gl.getUniformLocation(this.program, name)
+    }
+
     private createShader(type: number, source: string) {
         var shader = gl.createShader(type)
         gl.shaderSource(shader, source)
@@ -43,29 +47,35 @@ export abstract class ShaderProgram {
 
 }
 
-export class SimpleShader extends ShaderProgram {
+export class DefaultShader extends ShaderProgram {
 
     readonly positionAttr: number
+    readonly normalAttr: number
+
+    readonly projectionMatrixLocation: WebGLUniformLocation
+    readonly viewMatrixLocation: WebGLUniformLocation
+    readonly modelMatrixLocation: WebGLUniformLocation
 
     constructor(vertexSrc: string, fragmentSrc: string) {
         super(vertexSrc, fragmentSrc)
         this.positionAttr = this.getAttributeLocation("position")
-        console.log(`Position attribute location: ${this.positionAttr}`)
+        this.normalAttr = this.getAttributeLocation("normal")
+
+        this.projectionMatrixLocation = this.getUniformLocation("projectionMatrix")
+        this.viewMatrixLocation = this.getUniformLocation("viewMatrix")
+        this.modelMatrixLocation = this.getUniformLocation("modelMatrix")
     }
 
     loadProjectionMatrix(matrix: Float32Array) {
-        var location = gl.getUniformLocation(this.program, "projectionMatrix")
-        gl.uniformMatrix4fv(location, false, matrix)
+        gl.uniformMatrix4fv(this.projectionMatrixLocation, false, matrix)
     }
 
     loadViewMatrix(matrix: Float32Array) {
-        var location = gl.getUniformLocation(this.program, "viewMatrix")
-        gl.uniformMatrix4fv(location, false, matrix)
+        gl.uniformMatrix4fv(this.viewMatrixLocation, false, matrix)
     }
 
     loadModelMatrix(matrix: Float32Array) {
-        var location = gl.getUniformLocation(this.program, "modelMatrix")
-        gl.uniformMatrix4fv(location, false, matrix)
+        gl.uniformMatrix4fv(this.modelMatrixLocation, false, matrix)
     }
 
 }

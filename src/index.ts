@@ -1,58 +1,44 @@
-import { SimpleModel } from './model/model'
-import { SimpleShader } from './graphics/shader'
+import { Model } from './model/model'
+import { Entity } from './model/entity'
+import { DefaultShader } from './graphics/shader'
 import { Renderer } from './graphics/renderer'
+import { Camera } from './view/camera'
+
+import { vec3 } from 'gl-matrix'
 
 import { canvas, gl } from './gl'
 
-const vertices = [
-    -0.5, -0.5, 0.0,
-    0.5, -0.5, 0.0,
-    0.0, 0.5, 0.0,
-]
-
-const vertexShader = `\
-attribute vec3 position;
-
-varying vec3 color;
-
-void main(void) {
-    gl_Position = vec4(position, 1.0);
-    color = vec3(position.x + 0.5, 1.0, position.y + 0.5);
-}
-`
-
-const fragmentShader = `\
-precision mediump float;
-
-varying vec3 color;
-
-void main(void) {
-    gl_FragColor = vec4(color, 1.0);
-}
-`
-
 class Portfolio {
 
-    simpleModel: SimpleModel
-    simpleShader: SimpleShader
+    simpleModel: Model
+    simpleEntity: Entity
+    simpleShader: DefaultShader
+    camera: Camera
     renderer: Renderer
 
     constructor() {
-        //Resize
-        this.onResize();
-        window.onresize = () => this.onResize();
+
+        //Configure WebGL
+        gl.enable(gl.DEPTH_TEST)
+
+        //Camera
+        this.camera = new Camera()
 
         //Model
-        var verticesBuffer = new Float32Array(vertices.length)
-        verticesBuffer.set(vertices)
-        this.simpleModel = new SimpleModel(verticesBuffer)
+        this.simpleModel = new Model(vertices, colors)
+        this.simpleEntity = new Entity(this.simpleModel, vec3.fromValues(0, 0, -3))
 
         //Shader
-        this.simpleShader = new SimpleShader(vertexShader, fragmentShader)
+        this.simpleShader = new DefaultShader(vertexShader, fragmentShader)
 
         //Renderer
         this.renderer = new Renderer()
-        this.renderer.setShader(this.simpleShader)        
+        this.renderer.setShader(this.simpleShader)
+
+        //Resize
+        this.onResize();
+        window.onresize = () => this.onResize();
+        console.log(`Window size: ${canvas.width}, ${canvas.height}`)
     }
 
     start() {
@@ -63,7 +49,8 @@ class Portfolio {
     private loop() {
         gl.clear(gl.COLOR_BUFFER_BIT)
 
-        this.renderer.draw(this.simpleModel)
+        this.simpleEntity.rotate(vec3.fromValues(0, 0.01, 0))
+        this.renderer.draw(this.camera, this.simpleEntity)
 
         requestAnimationFrame(() => this.loop())
     }
@@ -72,9 +59,122 @@ class Portfolio {
         canvas.width = window.innerWidth
         canvas.height = window.innerHeight
         gl.viewport(0, 0, canvas.width, canvas.height)
-        console.log(`Window size: ${canvas.width}, ${canvas.height}`)
+        this.camera.updateProjection()
     }
 
 }
+
+const vertices: Array<number> = [
+    -0.5, -0.5, 0.5,
+    0.5, -0.5, 0.5,
+    -0.5, 0.5, 0.5,
+    -0.5, 0.5, 0.5,
+    0.5, -0.5, 0.5,
+    0.5, 0.5, 0.5,
+
+    0.5, -0.5, 0.5,
+    0.5, -0.5, -0.5,
+    0.5, 0.5, 0.5,
+    0.5, 0.5, 0.5,
+    0.5, -0.5, -0.5,
+    0.5, 0.5, -0.5,
+    
+    0.5, -0.5, -0.5,
+    -0.5, -0.5, -0.5,
+    0.5, 0.5, -0.5,
+    0.5, 0.5, -0.5,
+    -0.5, -0.5, -0.5,
+    -0.5, 0.5, -0.5,
+    
+    -0.5, -0.5, -0.5,
+    -0.5, -0.5, 0.5,
+    -0.5, 0.5, -0.5,
+    -0.5, 0.5, -0.5,
+    -0.5, -0.5, 0.5,
+    -0.5, 0.5, 0.5,
+
+    0.5, 0.5, -0.5,
+    0.5, 0.5, 0.5,
+    -0.5, 0.5, -0.5,
+    -0.5, 0.5, -0.5,
+    0.5, 0.5, 0.5,
+    0.5, 0.5, -0.5,
+
+    -0.5, -0.5, -0.5,
+    0.5, -0.5, -0.5,
+    -0.5, -0.5, 0.5,
+    -0.5, -0.5, 0.5,
+    0.5, -0.5, 0.5
+]
+
+const colors: Array<number> = [
+    0.0, 0.0, 1.0,
+    0.0, 0.0, 1.0,
+    0.0, 0.0, 1.0,
+    0.0, 0.0, 1.0,
+    0.0, 0.0, 1.0,
+    0.0, 0.0, 1.0,
+
+    1.0, 0.0, 0.0,
+    1.0, 0.0, 0.0,
+    1.0, 0.0, 0.0,
+    1.0, 0.0, 0.0,
+    1.0, 0.0, 0.0,
+    1.0, 0.0, 0.0,
+
+    0.0, 0.0, -1.0,
+    0.0, 0.0, -1.0,
+    0.0, 0.0, -1.0,
+    0.0, 0.0, -1.0,
+    0.0, 0.0, -1.0,
+    0.0, 0.0, -1.0,
+
+    -1.0, 0.0, 0.0,
+    -1.0, 0.0, 0.0,
+    -1.0, 0.0, 0.0,
+    -1.0, 0.0, 0.0,
+    -1.0, 0.0, 0.0,
+    -1.0, 0.0, 0.0,
+
+    0.0, 1.0, 0.0,
+    0.0, 1.0, 0.0,
+    0.0, 1.0, 0.0,
+    0.0, 1.0, 0.0,
+    0.0, 1.0, 0.0,
+    0.0, 1.0, 0.0,
+
+    0.0, -1.0, 0.0,
+    0.0, -1.0, 0.0,
+    0.0, -1.0, 0.0,
+    0.0, -1.0, 0.0,
+    0.0, -1.0, 0.0,
+    0.0, -1.0, 0.0,
+]
+
+const vertexShader = `\
+attribute vec3 position;\
+attribute vec3 normal;\
+\
+varying vec3 _color;\
+\
+uniform mat4 projectionMatrix;\
+uniform mat4 viewMatrix;\
+uniform mat4 modelMatrix;\
+\
+void main(void) {\
+    gl_Position = projectionMatrix * modelMatrix * vec4(position, 1.0);\
+    _color = position;\
+}\
+`
+
+const fragmentShader = `\
+precision mediump float;\
+\
+varying vec3 _color;\
+\
+void main(void) {\
+    gl_FragColor = vec4(_color + 0.5, 1.0);\
+}\
+`
 
 new Portfolio().start();
