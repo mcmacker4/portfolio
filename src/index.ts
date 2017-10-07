@@ -3,6 +3,7 @@ import { Entity } from './model/entity'
 import { DefaultShader } from './graphics/shader'
 import { Renderer } from './graphics/renderer'
 import { Camera } from './view/camera'
+import * as ObjParser from './model/objparser'
 
 import { vec3 } from 'gl-matrix'
 
@@ -25,7 +26,8 @@ class Portfolio {
         this.camera = new Camera()
 
         //Model
-        this.simpleModel = new Model(vertices, colors)
+        //this.simpleModel = new Model(vertices, colors)
+        this.simpleModel = ObjParser.loadModel('capsule')
         this.simpleEntity = new Entity(this.simpleModel, vec3.fromValues(0, 0, -3))
 
         //Shader
@@ -49,7 +51,7 @@ class Portfolio {
     private loop() {
         gl.clear(gl.COLOR_BUFFER_BIT)
 
-        this.simpleEntity.rotate(vec3.fromValues(0, 0.01, 0))
+        this.simpleEntity.rotate(vec3.fromValues(0.01, 0, 0))
         this.renderer.draw(this.camera, this.simpleEntity)
 
         requestAnimationFrame(() => this.loop())
@@ -93,7 +95,7 @@ const vertices: Array<number> = [
     -0.5, -0.5, 0.5,
     -0.5, 0.5, 0.5,
 
-    0.5, 0.5, -0.5,
+    -0.5, 0.5, 0.5,
     0.5, 0.5, 0.5,
     -0.5, 0.5, -0.5,
     -0.5, 0.5, -0.5,
@@ -104,6 +106,7 @@ const vertices: Array<number> = [
     0.5, -0.5, -0.5,
     -0.5, -0.5, 0.5,
     -0.5, -0.5, 0.5,
+    0.5, -0.5, -0.5,
     0.5, -0.5, 0.5
 ]
 
@@ -155,7 +158,7 @@ const vertexShader = `\
 attribute vec3 position;\
 attribute vec3 normal;\
 \
-varying vec3 _color;\
+varying vec3 _normal;\
 \
 uniform mat4 projectionMatrix;\
 uniform mat4 viewMatrix;\
@@ -163,17 +166,20 @@ uniform mat4 modelMatrix;\
 \
 void main(void) {\
     gl_Position = projectionMatrix * modelMatrix * vec4(position, 1.0);\
-    _color = position;\
+    _normal = normalize((modelMatrix * vec4(normal, 1.0)).xyz);\
 }\
 `
 
 const fragmentShader = `\
 precision mediump float;\
 \
-varying vec3 _color;\
+varying vec3 _normal;\
+\
+uniform vec3 sunDir;\
 \
 void main(void) {\
-    gl_FragColor = vec4(_color + 0.5, 1.0);\
+    float angle = max(0.0, dot(_normal, -normalize(sunDir)));
+    gl_FragColor = vec4(angle, angle, angle, 1.0);\
 }\
 `
 

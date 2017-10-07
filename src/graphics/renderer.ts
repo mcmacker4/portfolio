@@ -3,6 +3,8 @@ import { Model } from '../model/model'
 import { Camera } from '../view/camera'
 import { Entity } from '../model/entity'
 
+import { vec3 } from 'gl-matrix'
+
 import { gl } from '../gl'
 
 export class Renderer {
@@ -23,6 +25,7 @@ export class Renderer {
         //Load matrices
         this.shader.loadProjectionMatrix(camera.projection)
         this.shader.loadModelMatrix(entity.modelMatrix)
+        this.shader.loadSunDirection(vec3.fromValues(0, -1, 1))
 
         //Bind vertices buffer
         gl.bindBuffer(gl.ARRAY_BUFFER, model.verticesVBO)

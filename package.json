@@ -8,9 +8,11 @@
     "watch": "./node_modules/.bin/webpack -w"
   },
   "author": "mcmacker4",
+  "repository": "https://github.com/mcmacker4/portfolio",
   "license": "MIT",
   "devDependencies": {
     "@types/gl-matrix": "^2.3.0",
+    "@types/node": "^8.0.32",
     "ts-loader": "^2.3.7",
     "typescript": "^2.5.3",
     "webpack": "^3.6.0"

@@ -56,6 +56,8 @@ export class DefaultShader extends ShaderProgram {
     readonly viewMatrixLocation: WebGLUniformLocation
     readonly modelMatrixLocation: WebGLUniformLocation
 
+    readonly sunDirLocation: WebGLUniformLocation
+
     constructor(vertexSrc: string, fragmentSrc: string) {
         super(vertexSrc, fragmentSrc)
         this.positionAttr = this.getAttributeLocation("position")
@@ -64,6 +66,12 @@ export class DefaultShader extends ShaderProgram {
         this.projectionMatrixLocation = this.getUniformLocation("projectionMatrix")
         this.viewMatrixLocation = this.getUniformLocation("viewMatrix")
         this.modelMatrixLocation = this.getUniformLocation("modelMatrix")
+
+        this.sunDirLocation = this.getUniformLocation("sunDir")
+    }
+
+    loadSunDirection(sunDir: Float32Array) {
+        gl.uniform3f(this.sunDirLocation, sunDir[0], sunDir[1], sunDir[2])
     }
 
     loadProjectionMatrix(matrix: Float32Array) {
