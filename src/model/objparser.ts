@@ -4,7 +4,7 @@ import { vec3 } from 'gl-matrix'
 export function loadModel(name: string) : Model {
 
     const element = document.getElementById(name)
-    if(!element) throw new Error("Could not find model")
+    if(!element) throw new Error("Could not find model: " + name)
     const objString = element.textContent
 
     const vertices: Array<vec3> = []
